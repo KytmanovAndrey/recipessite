@@ -1,5 +1,5 @@
 import os
-from random import sample
+from random import choice
 
 from django.shortcuts import render, get_object_or_404
 from django.core.files.storage import FileSystemStorage
@@ -65,11 +65,13 @@ def show_recipe(request, recipe_id):
 
 
 def show_random_recipes(request):
-    recipes_all = Recipe.objects.count()
-    rand_list = sample(range(1, recipes_all + 1), k=5)
+    recipes_ids = list(Recipe.objects.values_list("id", flat=True))
+    if not recipes_ids:
+        text = 'В базе данных нет ни одного рецепта. Нужно добавить рецепты.'
+        return render(request, 'base.html', {'text': text})
     recipes = []
     for i in range(5):
-        recipe = get_object_or_404(Recipe, pk=rand_list[i])
+        recipe = get_object_or_404(Recipe, pk=choice(recipes_ids))
         recipes.append(recipe)
     return render(request, 'recipeapp/index.html', {'recipes': recipes})
 
